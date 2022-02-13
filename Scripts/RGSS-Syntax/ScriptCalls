@@ -1,0 +1,1413 @@
+
+Things to Remember!​
+ANY numbers you key in should NOT have leading zeros -​
+e.g. map numbers, event numbers, variable/switch numbers.​
+(E.g. Don't type EV002, just type in 2)​
+ ​
+Special Thanks and Credits!​
+Shaz for handling all my questions and missing functions!​
+Galv for taking time to figure out script call commands with me!​
+Yami for helping me find some missing functions and teaching about damage formulas which got referenced here!​
+Everyone in the Script Call Thread for the amazing script calls!​
+RMRK.Net for alternative Script Calls!​
+GrandmaDeb and everyone for reminding me that this should be done.​
+Check this thread as well!​
+Last edited by a moderator: Jul 28, 2014
+Like Reactions:Bex, AndyChen, TobiObito4ever and 38 others
+Archeia
+Archeia
+Level 99 Demi-fiend
+Developer
+Legend Released Something! Biscuits Brill Sweet Chocolate Just Grand Grand Job 'Cuppa Tea The Storyteller Toast Cupcake Fancy Toast Fancier Toast Waffles Strawberries and Cream Lovely Stuff Fudge Cake
+JoinedMar 1, 2012
+Messages14,732
+Reaction score14,595
+First LanguageFilipino
+Primarily UsesVNM
+Apr 5, 2014
+#2
+Message
+
+Show Text
+
+SPOILER
+Code:
+$game_message.face_name = 'fName'
+$game_message.face_index = fIndex
+$game_message.background = fBG
+$game_message.position = fPos
+$game_message.add("Text")
+# fName - Name of file containing desired face. Also automatically searches
+# files included in RGSS-RTP. File extensions may be omitted.
+# fIndex - Numerical identifier of face (0 is the first face).
+# fBG - [0] Normal, [1] Faded, [2] Transparent
+# fPos - [0] Top, [1] Middle, [2] Bottom
+
+Show Choices
+
+SPOILER
+This is not something we recommend to use. Show Choices is very complicated.
+Code:
+params = []
+choices = []
+choices.push("choice 1")
+choices.push("choice 2")
+params.push(choices)
+params.push(0/1/2 this part is where you press cancel and which choice to default)
+setup_choices(params)
+
+Input Number
+
+SPOILER
+Code:
+$game_message.num_input_variable_id = x
+$game_message.num_input_digits_max = y
+Example Usage:
+Input a 3 digit number into variable 5
+Code:
+$game_message.num_input_variable_id = 5
+$game_message.num_input_digits_max = 3
+
+Select Key Item
+
+SPOILER
+Code:
+$game_message.item_choice_variable_id = x
+Where x is the Variable Dd you want the item number put into.
+
+Show Scrolling Text
+
+SPOILER
+Code:
+$game_message.scroll_mode = true
+$game_message.scroll_speed = 1
+$game_message.scroll_no_fast = false
+$game_message.add("A long time ago,")
+$game_message.add("in a galaxy far, far away ...")
+$game_message.add("")
+$game_message.add("")
+$game_message.add("")
+$game_message.add("...")
+
+Party
+
+
+Change HP
+
+SPOILER
+Code:
+# For Single Actor
+# ----------------------------------------------
+actor = $game_actors[id]
+if !actor.dead?
+actor.change_hp(value, enable_death)
+actor.perform_collapse_effect if actor.dead?
+end
+
+# For Entire Party
+# ----------------------------------------------
+$game_party.members.each { |actor|
+next if actor.dead?
+actor.change_hp(value, enable_death)
+actor.perform_collapse_effect if actor_dead?
+}
+
+# Where id (in the first one) is the id of the single actor
+# value is the change to make (a positive or negative amount to be added to the current hp)
+# 5 will make someone with HP 10 go to 15
+# -5 will make someone with HP 10 go to 5
+# so it's not SETTING the value, but adjusting it.
+# enable_death is true or false
+
+Change MP
+
+SPOILER
+Code:
+# For Single Actor
+# ----------------------------------------------
+$game_actors[id].mp += value
+
+# For Entire Party
+# ----------------------------------------------
+$game_party.members.each { |actor| actor.mp += value }
+
+# where id (in the first one) is the id of the single actor
+# value is the amount to change
+# You can also do -= or *= or /= instead of += ... that way you can keep value positive
+
+Change State
+
+SPOILER
+Code:
+# Add State For Single Actor
+# ----------------------------------------------
+actor = $game_actors[id]
+already_dead = actor.dead?
+actor.add_state(state_id)
+actor.perform_collapse_effect if actor.dead? and !already_dead
+actor.result.clear
+
+# Remove State For Single Actor
+# ----------------------------------------------
+actor = $game_actors[id]
+actor.remove_state(state_id)
+actor.result.clear
+
+# Add State For Entire Party
+# ----------------------------------------------
+$game_party.members.each { |actor|
+already_dead = actor.dead?
+actor.add_state(state_id)
+actor.perform_collapse_effect if actor.dead? and !already_dead
+}
+$game_party.clear_results
+
+# Remove State For Entire Party
+# ----------------------------------------------
+$game_party.members.each { |actor| actor.remove_state(state_id) }
+$game_party.clear_results
+
+where id (in the first two) is the id of the individual actor
+state_id is the id of the state you want to add or remove
+
+# I'm working on the assumption that removing a state will NOT cause actor death. The interpreter script DOES do the
+# perform_collapse_effect if actor.dead? && !already_dead test even when removing a state.
+# LMK if you think that needs to be added in, and I'll adjust the state remove scriptlets.
+
+Recover All
+
+SPOILER
+Code:
+# For Single Actor
+# ----------------------------------------------
+$game_actors[id].recover_all
+
+# For Entire Party
+# ----------------------------------------------
+$game_party.members.each { |actor| actor.recover_all }
+
+Change EXP
+
+SPOILER
+Code:
+# For Single Actor
+# ----------------------------------------------
+$game_actors[id].change_exp(new_exp, show)
+
+# For Entire Party
+# ----------------------------------------------
+$game_party.members.each { |actor| actor.change_exp(new_exp, show)
+
+# where id (in the first one) is the id of the individual actor
+# show is true or false - if true, it will display a level up message and list new skills if the exp puts them past the current level
+# new_exp is what you want to SET the exp to (this is not an adjustment - if they have 50 and you want to add 10, you need to pass 60)
+# If you WANT to pass an adjustment, change this:
+new_exp
+# to this:
+actor.exp + value
+# where value is a positive or negative amount
+
+Change Level
+
+SPOILER
+Code:
+# For Single Actor
+# ----------------------------------------------
+$game_actors[id].change_level(new_level, show)
+
+# For Entire Party
+# ----------------------------------------------
+$game_party.members.each { |actor| actor.change_level(new_level, show)
+
+# where id (in the first one) is the id of the individual actor
+# show is true or false (as above, for level up and skills messages)
+# new_level is the level you want to change them to (not an adjustment)
+# If you WANT to make an adjustment (give them all an extra level, not necessarily make them all the SAME new level), change this:
+new_level
+# to this:
+actor.level + value
+# where value is a positive or negative amount
+
+Change Parameters
+
+SPOILER
+Code:
+# For Single Actor
+# ----------------------------------------------
+$game_actors[id].add_param(pid, value)
+
+# For Entire Party
+# ----------------------------------------------
+$game_party.members.each { |actor| actor.add_param(pid, value)
+
+# where id is the actor id
+# pid is the parameter id (0=MHP, 1=MMP, 2=ATK, 3=DEF, 4=MAT, 5=MDF, 6=AGI, 7=LUK)
+# value is the amount to add or subtract
+
+Change Skills
+
+SPOILER
+Code:
+# For Single Actor
+# ----------------------------------------------
+$game_actors[id].learn_skill(sid)
+$game_actors[id].forget_skill(sid)
+
+# For Entire Party
+# ----------------------------------------------
+$game_party.members.each { |actor| actor.learn_skill(sid) }
+$game_party.members.each { |actor| actor.forget_skill(sid) }
+
+# where id is the id of the actor
+# sid is the id of the skill to learn or forget
+
+Change Equipment
+
+SPOILER
+Code:
+$game_actors[id].change_equip_by_id(slot, equip) if $game_actors[id]
+# id is actor id
+# slot is the slot number (0=weapon, 1=shield, 2=head, 3=body, 4=accessory)
+# equip is the weapon or armor id
+
+Change Name
+
+SPOILER
+Code:
+$game_actors[id].name = "Name" if $game_actors[id]
+
+Change Class
+
+SPOILER
+Code:
+$game_actors[id].change_class(cid) if $game_actors[id] and $data_classes[cid]
+# where id is the actor id
+# cid is the class id
+
+Change Nickname
+
+SPOILER
+Code:
+$game_actors[id].nickname = "Nickname" if $game_actors[id]
+
+Party
+
+
+Change Gold
+
+SPOILER
+Code:
+$game_party.gain_gold(amount)
+$game_party.lose_gold(amount)
+Alternatively where Value is + or - amount.
+Code:
+$game_party.gain_gold(100) #Add Gold
+$game_party.gain_gold(-100) #Decrease Gold
+
+Change Items
+
+SPOILER
+Code:
+$game_party.gain_item($data_items[n], amount)
+$game_party.lose_item($data_items[n], amount)
+
+Change Weapons
+
+SPOILER
+Code:
+$game_party.gain_item($data_weapons[n], amount)
+$game_party.lose_item($data_weapons[n], amount)
+
+Change Armor
+
+SPOILER
+Code:
+$game_party.gain_item($data_armors[n], amount)
+$game_party.lose_item($data_armors[n], amount)
+
+Change Party Member
+
+SPOILER
+Code:
+# Add Actor by ID
+$game_party.add_actor(actor_id)
+
+# Remove Actor by ID
+$game_party.remove_actor(actor_id)
+
+# Remove Actor by Party Position
+partyMem = $game_party.members
+$game_party.remove_actor(partyMem[memPos].id)
+
+# actor_id - Numerical identifier of actor within database.
+# memPos - Numerical identifier of actor within current party. 0 = 1st member, 1 = 2nd member, etc
+Game Progression
+
+
+Control Switches
+
+SPOILER
+Code:
+$game_switches[n] = true/false
+
+Control Variables
+
+SPOILER
+Code:
+# ----------------------------------------------
+# Set a Value
+# ----------------------------------------------
+$game_variables[n] = n
+# ----------------------------------------------
+# Set a Value to a batch of variables
+# ----------------------------------------------
+(n..n).each { |i|
+$game_variables[i] = value
+}
+# Example:
+(1..5).each { |i|
+$game_variables[i] = 20
+}
+
+# Alternatively, you can use do
+(n..n).each do |i|
+$game_variables[i] = value
+end
+# Example:
+(1..5).each do |i|
+$game_variables[i] = 20
+end
+
+# ----------------------------------------------
+# For operator references:
+# ----------------------------------------------
+# Addition
+$game_variables[n] += n
+# Subtraction
+$game_variables[n] -= n
+# Multiply
+$game_variables[n] *= n
+# Division
+$game_variables[n] /= n
+# Modulus
+$game_variables[n] %= n
+# String (aka text)
+$game_variables[n] = "Insert string here!"
+# Another Variable
+$game_variables[n] = $game_variables[n]
+
+# Variable References
+$game_variables[$game_variables[n]] = value
+
+# Randomize
+$game_variables[n] = rand(value)
+
+# Example for Randomize:
+# If you use rand(10) you get a number between 0-9
+$game_variables[1] = rand(10)
+# To have negative values, put something like "*-5 + rand(11)" to get a number between -5 to 5
+$game_variables[1] = (-5 + rand(11))
+
+# ----------------------------------------------
+# For Game Data References:
+# ----------------------------------------------
+
+# Amount of Items in Inventory
+$game_variables[n] = $game_party.item_number($data_items[n])
+# Example Usage: Amount of Potions in Inventory is going to be displayed Variable 1
+$game_variables[1] = $game_party.item_number($data_items[1])
+
+# Amount of Weapons in Inventory
+$game_variables[n] = $game_party.item_number($data_weapons[n])
+
+# Amount of Armors in Inventory
+$game_variables[n] = $game_party.item_number($data_armors[n])
+
+# Map ID
+$game_variables[n] = $game_map.map_id
+
+# Gold
+$game_variables[n] = $game_party.gold
+
+# Steps
+$game_variables[n] = $game_party.steps
+
+# Playtime
+$game_variables[n] = $game_system.playtime_s
+
+# Frame Count and Frame Rate
+$game_variables[n] = Graphics.frame_count
+$game_variables[n] = Graphics.frame_rate
+
+# Timer
+$game_variables[n] = $game_timer.sec
+
+# Save Count
+$game_variables[n] = $game_system.save_count
+
+# Battle Count
+$game_variables[n] = $game_system.battle_count
+
+# Party Members Related
+# To reference who's in a particular position in the lineup, it's
+$game_variables[n] = $game_party.members[index].id
+# where index is the position (starting at 0 for the leader)
+
+# To reference where someone is in the lineup, it's
+$game_variables[n] = $game_actors[id].index
+# where id is the actor id
+
+# Actor Level
+$game_variables[n] = $game_actors[n].level
+# Actor HP
+$game_variables[n] = $game_actors[n].hp
+# Actor Max HP
+$game_variables[n] = $game_actors[n].mhp
+# Actor MP
+$game_variables[n] = $game_actors[n].mp
+# Actor Max MP
+$game_variables[n] = $game_actors[n].mmp
+# Actor Attack
+$game_variables[n] = $game_actors[n].atk
+# Actor Defense
+$game_variables[n] = $game_actors[n].def
+# Actor MagAtk
+$game_variables[n] = $game_actors[n].mat
+# Actor MagDef
+$game_variables[n] = $game_actors[n].mdf
+# Actor Agility
+$game_variables[n] = $game_actors[n].agi
+# Actor Luck
+$game_variables[n] = $game_actors[n].luk
+# Actor Pharmacology
+$game_variables[n] = $game_actors[n].pha
+
+# Enemy Troop Stats (use this only in battle!)
+$game_variables[n] = $game_troop.members[index].stat
+# where stat = hp or mp or param(id)
+# where id = 0:MHP, 1:MMP, 2:ATK, 3:DEF, 4:MAT, 5:MDF, 6:AGI, 7:LUK
+
+Control Self Switch
+
+SPOILER
+Code:
+$game_self_switches[[map, event, 'self_switch']] = value
+Map is either @map_id (for the current map) or a number without leading zeros for a map other than the current one
+event is either @event_id (for the current event) or a number for an event other than the current one (EV001 would be 1)
+self_switch is 'A', 'B', 'C' or 'D' (must have the single or double quotes)
+value is either true or false
+
+Control Timer
+
+SPOILER
+Code:
+# Start Timer
+$game_timer.start(sec * Graphics.frame_rate)
+
+# Stop Timer
+$game_timer.stop
+Seconds is the number of seconds to set on the timer. You must convert minutes and seconds to total seconds.
+Flow Control
+
+
+Conditional Branch
+
+SPOILER
+For a better explanation of Conditional Branches, search the Help File for Control Structures.
+It will give you a better idea of how to use them and what kind of Control Structure to use.
+Code:
+# Basic Conditional Branch
+if put condition here
+# do stuff
+else
+# do stuff
+end
+
+# Forked Conditions -- basically when you have a lot of conditions going on.
+if stuff here happens
+# do stuff
+elsif stuff happens here too!
+# do stuff
+elsif stuff happens again!
+# do stuff
+elsif stuff happens...
+# do stuff
+end
+
+Call Common Event
+
+SPOILER
+Code:
+$game_temp.reserve_common_event(ID)
+Last edited: Feb 3, 2017
+Like Reactions:Bex, Tsar CUBE, lianderson and 19 others
+Archeia
+Archeia
+Level 99 Demi-fiend
+Developer
+Legend Released Something! Biscuits Brill Sweet Chocolate Just Grand Grand Job 'Cuppa Tea The Storyteller Toast Cupcake Fancy Toast Fancier Toast Waffles Strawberries and Cream Lovely Stuff Fudge Cake
+JoinedMar 1, 2012
+Messages14,732
+Reaction score14,595
+First LanguageFilipino
+Primarily UsesVNM
+Apr 5, 2014
+#3
+Movement
+
+Transfer Player
+
+SPOILER
+Code:
+$game_temp.fade_type = fade
+$game_player.reserve_transfer(map_id, x, y, direction)
+# Fade/Fade Style =  [0; Default, Black], [1] White, [2] None
+# For direction: [0; Default, Retain], [2] Down, [4] Left, [8] Up, [6] Right
+
+Set Vehicle Location
+
+SPOILER
+Code:
+# ----------------------------------------------
+# To set Vehicle Location
+# ----------------------------------------------
+$game_map.vehicles[n].set_location(map_id, x, y)
+# n = [0] boat, [1] ship, [2] airship
+
+# ----------------------------------------------
+# To Refer Game Vehicles
+# ----------------------------------------------
+$game_map.vehicles[n]
+$game_map.vehicles[n].x
+$game_map.vehicles[n].y
+# n = [0] boat, [1] ship, [2] airship
+
+# To find a Vehicle's Map ID, you would need to add a accessor reader.
+# Add the following code in Script Editor:
+class Game_Vehicle < Game_Character
+  attr_reader   :map_id
+end
+
+# or Edit Game_Vehicle and add attr_reader   :map_id
+
+Set Event and Player Location
+
+SPOILER
+# Move Event ID to new X and new Y Position
+# ----------------------------------------------
+$game_map.events[id].moveto(new_x, new_y)
+
+# Move Player to new X and new Y Position
+# ----------------------------------------------
+$game_player.moveto(x, y)
+
+Scroll Map
+
+SPOILER
+Code:
+Fiber.yield while $game_map.scrolling? # Add this if just the script call below doesn't work.
+$game_map.start_scroll(direction, distance, speed)
+# Direction = [2]Down [4]Left [6]Right [8]Up
+# Distance = How many tiles you want it to scroll
+# Speed = [1]8x Slower [2]4x Slower [3]2x Slower [4]Normal [5]2x Faster [6]4x Faster
+
+Set Move Route
+
+SPOILER
+Code:
+move_route = RPG::MoveRoute.new
+move_route.repeat = false           # This means the event will repeat the action
+move_route.skippable = true         # This means the event will skip the move route if it's not possible
+m = RPG::MoveCommand.new
+m.code = 45                         # The List of M Code can be found over Game_Character Default Script, this current m.code is call script
+m.parameters = ["script call here"] # This is if you use #45 in M.code
+                                    # To show animation in move route just type animation_id = n, for balloons it's balloon_id = n
+move_route.list.insert(0,m.clone)
+
+$game_player.force_move_route(move_route)         # For Player
+$game_map.events[ID].force_move_route(move_route) # For Events
+
+# ----------------------------------------------
+# Other Move Route Options
+# ----------------------------------------------
+
+# Single Action
+newCommand.code       = moveCode       # See List in Game_Character Default Script
+newCommand.parameters = [""]           # This refers to Jump, Wait, Switch On, Switch Off, Change Speed,
+                                       # Change Frequency, Change Graphic, Change Opacity, Play SE and Script.
+newRoute.list.insert(0,newCommand.clone)
+
+# Multiple Actions (Example)
+# newCommand.code       = 1
+# newRoute.list.insert(0,newCommand.clone)
+# newCommand.code       = 3
+# newRoute.list.insert(0,newCommand.clone)
+# newCommand.code       = 1
+# newRoute.list.insert(0,newCommand.clone)
+
+# For Turning
+$game_map.events[eventid].set_direction(n) # For Events
+$game_player.set_direction(n)              # For Players
+#Direction n = [2]Down [4]Left [6]Right [8]Up
+
+# Changing Event Graphic
+$game_map.events[id].set_graphic("character_name", character_index)
+# id is the id of the event you want to change.
+# "character_name" is the name of the graphic file you want to change to (make sure to keep the quotation marks).
+# character_index is the index on the character sheet (it starts counting at 0).
+
+Get On/Off Vehicle
+
+SPOILER
+Code:
+$game_player.get_on_off_vehicle =  true/false
+Timing
+
+Wait
+
+SPOILER
+Code:
+Wait(n)
+
+# From a move route or something like that, you'd need the following:
+SceneManager.scene.wait(x)
+
+#The following should work as well from anywhere.
+x.times { Fiber.yield }
+Picture and Weather
+
+
+Show Picture
+
+SPOILER
+Code:
+screen.pictures[index].show(file_name, position, x, y, x zoom, y zoom, opacity, blend type)
+# position = [0] Top Left, [1] = Center
+# blend type = [0] Normal, [1] Add, [2] Sub
+
+Move Picture
+
+SPOILER
+Code:
+screen.pictures[n].move(position, x, y, x zoom, y zoom, opacity, blend type, wait)
+# position = [0] Top Left, [1] = Center
+# blend type = [0] Normal, [1] Add, [2] Sub
+
+Rotate Picture
+
+SPOILER
+Code:
+screen.pictures[n].rotate(n)
+
+Tint Picture
+
+SPOILER
+Code:
+screen.pictures[n].start_tone_change(Tone.new(0, 0, 0, 0), wait)
+
+Erase Picture
+
+SPOILER
+Code:
+screen = $game_party.in_battle ? $game_troop.screen : $game_map.screen # The first line is not required
+screen.pictures[n].erase                                               # if you're using this in an event on the map.
+
+Set Weather Effects
+
+SPOILER
+Code:
+$game_map.screen.change_weather(type, power, duration)
+# type = :none, :rain, :storm, or :snow
+# power = Intensity of weather. If weather type is none :)none), set power (target value of intensity)
+# to 0 to represent gradual stopping of rain, but only in this case.
+# time = Specified time to fade weather in or out.
+Character
+
+Change Transparency
+
+SPOILER
+Code:
+$game_player.transparent = true/false
+
+Change Player Followers
+
+SPOILER
+Code:
+$game_player.followers.visible = true/false
+$game_player.refresh
+
+Gather Followers
+
+SPOILER
+Code:
+$game_player.followers.gather
+
+Show Animation
+
+SPOILER
+Code:
+$game_player.animation_id = n              # For Player
+$game_map.events[eventid].animation_id = n # For Events
+
+Show Balloon Icon
+
+SPOILER
+Code:
+$game_player.balloon_id = n               # For Player
+$game_map.events[eventid].balloon_id = n  # For Events
+# Top Row is 1 (Exclamation by Default).
+
+Erase Event
+
+SPOILER
+Code:
+$game_map.events[event_id].erase
+Screen Effects
+
+Fade Out Screen
+
+SPOILER
+Code:
+Fiber.yield while $game_message.visible
+screen.start_fadeout(30)
+wait(30)
+# Note: 30 can be change to any number
+
+Fade In Screen
+
+SPOILER
+Code:
+Fiber.yield while $game_message.visible
+screen.start_fadein(30)
+wait(30)
+# Note: 30 can be change to any number
+
+Tint Screen
+
+SPOILER
+Code:
+tone = Tone.new(R,G,B,Opacity)
+$game_map.screen.start_tone_change(tone, duration)
+wait(n)                                       # Add these too to allow 'wait till the screen changes tint.
+n.to_i.times { Fiber.yield }                  # Number of frames to wait (1000 is equal to 1 second)
+
+Flash Screen
+
+SPOILER
+Code:
+color = Color.new(R,G,B,Opacity)
+screen.start_flash(color, t)
+wait(t)
+# t = time
+# Example below:
+color = Color.new(255,255,25,100)
+screen.start_flash(color, 6)
+wait(6)
+
+Shake Screen
+
+SPOILER
+Code:
+$game_map.screen.start_shake(power, speed, duration)
+
+# power            - Intensity of shaking.
+# speed            - Speed of shaking.
+# duration         - Specified time for shaking to occur.
+
+Musics and Sounds
+
+Play BGM/ME/BGS/SE
+
+SPOILER
+Code:
+RPG::BGM.new("BGM Name", volume, pitch).play
+RPG::ME.new("ME Name", volume, pitch).play
+RPG::BGS.new("BGS Name", volume, pitch).play
+RPG::SE.new("SE Name", volume, pitch).play
+
+# Alternative Script Calls
+# ----------------------------------------------
+Audio.bgm_play(fName, volume, pitch, pos)
+Audio.bgs_play(fName, volume, pitch, pos)
+Audio.me_play(fName, volume, pitch)
+Audio.se_play(fName, volume, pitch)
+# fName      - Name of file containing desired sound file. Also automatically searches
+#              files included in RGSS-RTP. File extensions may be omitted.
+# volume     - [100; Default - Max:100, Min:0] Volume of sound. OPTIONAL
+# pitch      - [100; Default - Max:500, Min:1] Pitch of sound. OPTIONAL
+# pos        - Position of sound file. OPTIONAL
+
+# Play Map BGM (Does not Save Position)
+# ----------------------------------------------
+$game_map.autoplay
+
+# Play Battle Music
+# ----------------------------------------------
+BattleManager.play_battle_bgm
+
+# Play Battle Victory Music
+# ----------------------------------------------
+BattleManager.play_battle_end_me
+
+Save BGM/Replay BGM/Fade Out BGM/Stop BGM
+
+SPOILER
+Code:
+# Save BGM
+# ----------------------------------------------
+$game_system.save_bgm
+
+# Save BGM and BGS
+# ----------------------------------------------
+BattleManager.save_bgm_and_bgs
+
+# Replay BGM
+# ----------------------------------------------
+$game_system.replay_bgm
+
+# Replay BGM and BGS
+# ----------------------------------------------
+BattleManager.replay_bgm_and_bgs
+
+# Fade BGM/BGS/ME
+# ----------------------------------------------
+RPG::BGM.fade(seconds * 1000)
+RPG::BGS.fade(seconds * 1000)
+RPG::ME.fade(seconds * 1000)
+
+# Alternative Script Calls
+# ----------------------------------------------
+# Fade BGM
+# ----------------------------------------------
+RPG::BGM.fade(time)
+# Or ...
+Audio.bgm_fade(time)
+
+# Fade BGS
+# ----------------------------------------------
+RPG::BGS.fade(time)
+# Or ...
+Audio.bgs_fade(time)
+
+# Fade ME
+# ----------------------------------------------
+RPG::ME.fade(time)
+# Or ...
+Audio.me_fade(time)
+
+# time = Number of milliseconds (1000 is equal to 1 second)
+
+# Stop BGM
+# ----------------------------------------------
+RPG::BGM.stop
+RPG::BGS.stop
+RPG::ME.stop
+
+# Alternative Script Calls
+# ----------------------------------------------
+# Halt BGM (Immediate)
+# ----------------------------------------------
+RPG::BGM.stop
+# Or ...
+Audio.bgm_stop
+
+# Halt BGS (Immediate)
+# ----------------------------------------------
+RPG::BGS.stop
+# Or ...
+Audio.bgs_stop
+
+# Halt ME (Immediate)
+# ----------------------------------------------
+RPG::ME.stop
+# Or ...
+Audio.me_stop
+
+# Halt SE (Immediate)
+# ----------------------------------------------
+RPG::SE.stop
+# Or ...
+Audio.se_stop
+Last edited: Feb 3, 2017
+Like Reactions:Bex, TobiObito4ever, Tsar CUBE and 15 others
+Archeia
+Archeia
+Level 99 Demi-fiend
+Developer
+Legend Released Something! Biscuits Brill Sweet Chocolate Just Grand Grand Job 'Cuppa Tea The Storyteller Toast Cupcake Fancy Toast Fancier Toast Waffles Strawberries and Cream Lovely Stuff Fudge Cake
+JoinedMar 1, 2012
+Messages14,732
+Reaction score14,595
+First LanguageFilipino
+Primarily UsesVNM
+Apr 5, 2014
+#4
+Scene Control
+
+Battle Processing
+
+SPOILER
+Code:
+troop_id = variable
+e = true/false (if escape enabled)
+l = true/false (if continue when lose)
+
+BattleManager.setup(troop_id, e, l)
+BattleManager.event_proc = Proc.new {|n|
+@branch[@indent] = n }
+$game_player.make_encounter_count
+SceneManager.call(Scene_Battle)
+Fiber.yield
+
+# Example Script Call below:
+troop_id = 1
+e = true
+l = true
+
+BattleManager.setup(troop_id, e, l)
+BattleManager.event_proc = Proc.new {|n|
+@branch[@indent] = n }
+$game_player.make_encounter_count
+SceneManager.call(Scene_Battle)
+Fiber.yield
+
+# OR
+
+BattleManager.setup(1, true, true)
+BattleManager.event_proc = Proc.new {|n|
+@branch[@indent] = n }
+$game_player.make_encounter_count
+SceneManager.call(Scene_Battle)
+Fiber.yield
+
+Shop Processing
+
+SPOILER
+Code:
+goods = [[type, id, price_override_flag(, price)]]
+SceneManager.call(Scene_Shop)
+SceneManager.scene.prepare(goods, true)
+
+# Example Script Call:
+goods = [[0,1,1,25],[0,2,0]]
+SceneManager.call(Scene_Shop)
+SceneManager.scene.prepare(goods, true)
+
+# You can also use a loop to add the elements to the array:
+goods = []
+for id in 1..20
+goods.push([0, id, 0])
+end
+
+Name Input Processing
+
+SPOILER
+Code:
+SceneManager.call(Scene_Name)
+SceneManager.scene.prepare(actor_id, chars)
+Fiber.yield
+# Actor ID = Actor ID, Chars = How many characters long the name can be.
+
+Open Save/Load/Exit/Game Over/Scenes
+
+SPOILER
+Code:
+SceneManager.call(Scene_Save)
+SceneManager.call(Scene_Load)
+SceneManager.exit
+SceneManager.call(Scene_Gameover)
+
+SceneManager.call(scene)
+# scene = Scene to load. (example - SceneManager.call(Scene_Skill) )
+# Scene_Menu, Scene_Item, Scene_Skill, Scene_Status, Scene_Title
+# Scene_Save, Scene_Load, Scene_Name, Scene_Debug, etc.
+Map
+
+Change Map Display Name
+
+SPOILER
+Code:
+$game_map.name_display = true/false
+
+Change Tileset
+
+SPOILER
+Code:
+$game_map.change_tileset(n)
+
+Change Battleback
+
+SPOILER
+Code:
+$game_map.change_battleback("battleback1", "battleback2")
+
+Change Parallax Back
+
+SPOILER
+Code:
+$game_map.change_parallax("graphicname", Loop Horizontal, Loop Vertical, HScroll, VScroll)
+# Loop Horizontal and Loop Vertical = true/false
+# HScroll, VScroll = numbers
+# Example: $game_map.change_parallax("BlueSky", true, true, 0, 0)
+
+Check Location
+
+SPOILER
+Code:
+# X and Y's
+# ----------------------------------------------
+$game_player.x
+$game_player.y
+
+$game_map.events[n].x
+$game_map.events[n].y
+# n = Event ID
+
+
+# Check Terrain Tag
+# ----------------------------------------------
+$game_map.terrain_tag(x, y)
+$game_player.terrain_tag
+$game_map.events[event_id].terrain_tag
+
+# Check Region ID
+# ----------------------------------------------
+$game_map.region_id(x, y)
+$game_player.region_id == n
+$game_map.events[event_id].region_id == n
+
+# Check Map Name and Map ID
+# ----------------------------------------------
+$game_map.name
+$game_map.map_id
+
+# Check if Event is Near Player
+# ----------------------------------------------
+$game_map.events[n].near_the_player?
+
+# True/False. Distance for detection is 20 squares.
+# n = Event ID
+System Settings
+
+Change Actor/Event Graphic
+
+SPOILER
+Code:
+# Event Change Graphic
+# ----------------------------------------------
+$game_map.events[id].set_graphic("character_name", character_index)
+# id is the id of the event you want to change.
+# "character_name" is the name of the graphic file you want to change to (make sure to keep the quotation marks).
+# character_index is the index on the character sheet (it starts counting at 0).
+
+# Actor Change Graphic
+# ----------------------------------------------
+hero = $game_actors[ID]
+hero.set_graphic("characterset_filename", character_index, "Faceset_filename", faceset_index)
+$game_player.refresh
+# ID = Actor Index
+# character_index = Starts from 0 (Top Left), 1, 2, ...
+# faceset_index = Starts from 0 (Top Left), 1, 2, ...
+
+# Example:
+hero = $game_actors[1]
+hero.set_graphic("Actor1", 1, "Actor4", 1)
+$game_player.refresh
+Last edited: Feb 3, 2017
+Like Reactions:Bex, Tsar CUBE, Jatopian and 9 others
+Archeia
+Archeia
+Level 99 Demi-fiend
+Developer
+Legend Released Something! Biscuits Brill Sweet Chocolate Just Grand Grand Job 'Cuppa Tea The Storyteller Toast Cupcake Fancy Toast Fancier Toast Waffles Strawberries and Cream Lovely Stuff Fudge Cake
+JoinedMar 1, 2012
+Messages14,732
+Reaction score14,595
+First LanguageFilipino
+Primarily UsesVNM
+Apr 5, 2014
+#5
+Miscellanous
+
+Debugging Tools
+
+SPOILER
+Code:
+# Add every Item/Skill/Weapon/Etc. without blank fields.
+# ----------------------------------------------
+$data_items.each { |i|
+next if i.nil? or i.name == ""
+$game_party.gain_item(i, 99)
+}
+# Change $data_items to $data_weapons or something else and the amount you want.
+Code:
+# Remove every Item/Skill/Weapon/Etc. without blank fields.
+class Game_Party < Game_Unit
+
+  def unequip_all
+    members.each do |i|
+     i.equip_slots.each do |j|
+       i.change_equip(j, nil)
+     end
+    end
+  end
+
+end
+$game_party.unequip_all
+$game_party.init_all_items
+
+# Use Items immediately
+# ----------------------------------------------
+$game_actors[id].use_item($data_items[x])
+$game_party.leader.use_item($data_items[x])
+$game_party.members[index].use_item($data_items[x])
+
+# Check Party Member Size
+# ----------------------------------------------
+$game_party.members.size
+$game_party.all_members.size
+# If In Battle, use this instead. This checks the total size of your party (not just battlers).
+
+# Checking Availability
+# ----------------------------------------------
+$game_actors[X].equips.include?($data_weapons[Y]) # Checks if the actor X has weapon Y equipped
+$game_actors[X].equips.include?($data_armors[Y]) # Checks if the actor X has equipment
+#(shield, armor, helmet or accessory)
+# Y equipped
+$game_actors[X].skills.include?($data_skills[Y]) # Checks if the actor X has learned skill Y
+$game_actors[X].states.include?($data_states[Y]) # Checks if the actor X is afflicted by status
+# effect Y
+
+$game_actors[actorid].skill_learn?($data_skills[skillid]) # If Player learned Skill. actorid and skillid
+# are the ids from the database of
+# the actor and skill you're interested in.
+# It will return true if they have that skill, an
+# false if they don't.
+
+# Example Usage:
+# if xxx weapon type is the same as unless xxx == nil
+$game_actors[x].equips[y].wtype_id if $game_actors[x].equips[y]
+
+# Check for Name/ID of Player Equipment
+# ----------------------------------------------
+$game_actors[X].equips[Y].id unless $game_actors[X].equips[Y] == nil
+# Returns the ID of the equipment on actor X, equipped in slot Y
+
+$game_actors[X].equips[Y].name unless $game_actors[X].equips[Y] == nil
+# Returns the name of the equipment on actor X equipped in slot Y
+
+# NOTE: If using any scripts that give or take equipment slots, the #Y is the number of the character's slot
+# not the slot's number in the script. I.E. using Yanfly Equip Menu script - if your character has equipment
+# slots 6,7,8,15,15,32,75 available then $game_actors[1].equips[0].id would return the ID of the
+# item equipped in the slot defined as slot 6 in Yanfly script because it's the 1st equipment slot for the
+# specific character.
+
+# Checking Actors
+# ----------------------------------------------
+$game_actors[X].name # Returns the name of the actor X
+$game_actors[X].nickname # Returns the nickname of the actor X
+$game_actors[X].class.id # Returns the ID of the actor X class
+$game_actors[X].class.name # Returns the name of the actor X class
+
+# Screen Clean Up
+# ----------------------------------------------
+# Clear Fade
+# Clear Tone
+# Clear Flash
+# Clear Shake
+# Clear Weather
+# Clear Pictures
+$game_map.screen.clear
+
+
+# Clear Tone (Immediate)
+$game_map.screen.clear_tone
+
+# Clear Shake (Immediate)
+$game_map.screen.clear_shake
+
+# Clear Weather (Immediate)
+$game_map.screen.clear_weather
+
+# Clear Pictures (Immediate)
+$game_map.screen.clear_pictures[/CODE]
+
+Input Commands
+
+SPOILER
+Code:
+Input.trigger?(:A)
+Input.repeat?(:A)
+Input.press?(:A)
+# Change A to your desired key, refer to F1 when you testplay and see the keys.
+
+Movement Commands
+
+SPOILER
+Code:
+$game_player.moving?
+$game_player.dash?
+$game_player.jumping?
+$game_map.events[event_id].moving?
+$game_map.events[event_id].jumping?
+
+$game_map.passable?(X, Y, D)
+$game_player.passable?(x, y, d)
+$game_map.events[event_id].passable?(x, y, d)
+
+# $game_map.passable? only tells you whether you can leave one tile in the direction of the other.
+# The player and event versions take it further and tell you if you can leave that tile in the
+# direction of the other AND if you can enter the other tile from the tile you're on now (for example,
+# if you are facing right and the tile in front of you is the edge of a cliff that is higher than you -
+# $game_map.passable? would tell you that you CAN step right from the current tile.
+# But $game_player.passable? would tell you that you could not move onto the next tile from the left).
+# It also looks to see if there is an event on your target tile which would stop you going there,
+# but $game_map.passable? would not tell you that.
+
+# Q: I want to check the position of Player and compare with the position at side of Events.
+# ----------------------------------------------
+# Variable [6] = Position X Player
+# Variable [7] = Position Y Player
+# Variable [8] = Position X Event
+# Variable [9] = Position Y Event
+
+# If you only want them to be beside the event (positions 1 or 3), use this:
+$game_variables[7] == $game_variables[9] and ($game_variables[6] - $game_variables[8]).abs == 1
+# which says if the y value is the same and there is a difference of 1 between the x values.
+# Note: abs = absolute value
+
+# If you want them to be on any of the 4 numbered tiles, use this:
+($game_variables[6] - $game_variables[8]).abs + ($game_variables[7] - $game_variables[9]).abs == 1
+# which says there is a difference of 1 between the x values OR a difference of 1 between the y values
+# It is comparing the difference between the x position of the player and the tile of interest.
+# Using abs lets me take one away from the other in any order and still end up with a positive number -
+# it doesn't matter which has the # higher or lower x value. Then it does the same with the y position of
+# the player and the tile of interest. Then it adds them together (+ means plus, not and).
+# So if the sum of the x distance and the y distance between the two tiles is 1, it means the player is on
+# a tile that is directly touching the tile of interest (and not corner-ways, as then the sum of the numbers would be 2)
+
+# ----------------------------------------------
+# Follower Move Route Option
+# ----------------------------------------------
+$game_player.followers[n].force_move_route(move_route)
+# For Followers (0 for first after actor, 1 for second after actor, etc.)
+
+Player Equipment
+
+SPOILER
+Code:
+# Change an actor's equipment.
+# ----------------------------------------------
+$game_actors[1].change_equip(n,$data_weapons[1])
+# Change n with one of the following:
+# 0 = weapon, 1 = shield, 2 = headgear, 3 = body-gear (armor), 4 = accessory
+
+# Check Conditional Branch: if [Actor] has [Weapon] Equipped
+# ----------------------------------------------
+$game_actors[actor id].weapons.include?($data_weapons[weapon id])
+right_hand = $game_actors[actor_id].equips[0]
+left_hand = $game_actors[actor_id].equips[1]
+
+# To get the items. Replace the index in equips for the item you're looking for:
+# 0 = right hand, 1 = left hand, 2 = head, 3 = body, 4 = accessory
+# provided you're not using any scripts that change that. You can check their types with:
+
+ if right_hand.is_a?(RPG::Weapon)
+    # do something
+  elsif right_hand.is_a?(RPG::Armor)
+   # do something else
+  end
+
+# Or get their properties with with:
+  right_hand.id
+  right_hand.name
+  right_hand.icon_index
+  right_hand.description
+  # etc..
+ 
+# Example: if you want to check if you have a Prinny Gun equipped on your first weapon slot:
+  right_hand = $game_actors[actor_id].equips[0]
+  if !right_hand.nil? && right_hand.name.eql?("Prinny Gun")
+    # Do something
+  end
+
+# You don't even need to keep track of the IDs, really (unless you want to, for some reason).
+# If there's no way to not have a weapon equipped in your game, you can also take out the ".nil?" check.
+
+Unsorted
+
+SPOILER
+Code:
+# Currency unit set from the system tab:
+# ----------------------------------------------
+$data_system.currency_unit
+
+# Move Events and players by fractional squares
+# ----------------------------------------------
+$game_map.events[ID].moveto(x, y)
+$game_player.moveto(x, y)
+
+# Example of fractional squares
+$game_map.events[1].moveto(0, 5.5)
+$game_player.moveto(7.5, 3)
+end
+# The Collission box is still seen as 32x32
+
+# Script Call Battle Logs!
+# ----------------------------------------------
+# First add this scriptlet:
+class Scene_Battle < Scene_Base
+  attr_accessor:log_window
+end
+ 
+# To load your own battle logs
+SceneManager.scene.log_window.add_text("Insert custom text here")
+# It doesn't clear out and just stays there until something else replaces it.
+SceneManager.scene.log_window.wait
+# If you want it to clear make sure to use this.
+SceneManager.scene.log_window.wait_and_clear
+ 
+# You can also do something like this!
+x  = "Hi."
+x += " Hello."
+x += " This is getting long eh?"
+x += " Surely so long. wahahahahahaha"
+SceneManager.scene.log_window.add_text(x)
+ 
+# or:
+y = SceneManager.scene.log_window
+y.add_text(text)
+Last edited: Dec 25, 2018
+Like Reactions:Bex, Tsar CUBE, Jatopian and 13 others
+Archeia
+Archeia
+Level 99 Demi-fiend
+Developer
+Legend Released Something! Biscuits Brill Sweet Chocolate Just Grand Grand Job 'Cuppa Tea The Storyteller Toast Cupcake Fancy Toast Fancier Toast Waffles Strawberries and Cream Lovely Stuff Fudge Cake
+JoinedMar 1, 2012
+Messages14,732
+Reaction score14,595
+First LanguageFilipino
+Primarily UsesVNM
+Apr 5, 2014
+#6
+~ RESERVED ~
+Last edited by a moderator: Apr 5, 2014
+Like Reactions:Philsco and ShinGamix
+Archeia
+Archeia
+Level 99 Demi-fiend
+Developer
+Legend Released Something! Biscuits Brill Sweet Chocolate Just Grand Grand Job 'Cuppa Tea The Storyteller Toast Cupcake Fancy Toast Fancier Toast Waffles Strawberries and Cream Lovely Stuff Fudge Cake
+JoinedMar 1, 2012
+Messages14,732
+Reaction score14,595
+First LanguageFilipino
+Primarily UsesVNM
+May 8, 2014
+#7
+Updated Movement Commands in Miscellanous with:
+
+#Follower Move Route Option
+-$game_player.followers[n].force_move_route(move_route)
+# For Followers (0 for first after actor, 1 for second after actor, etc.)
